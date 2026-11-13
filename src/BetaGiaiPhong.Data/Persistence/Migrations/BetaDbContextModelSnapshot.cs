@@ -673,6 +673,13 @@ namespace BetaGiaiPhong.Data.Persistence.Migrations
                         .HasColumnType("nvarchar(100)")
                         .HasColumnName("room_name");
 
+                    b.Property<string>("RoomType")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("varchar(24)")
+                        .HasDefaultValue("2D")
+                        .HasColumnName("room_type");
+
                     b.Property<string>("Status")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
@@ -689,6 +696,8 @@ namespace BetaGiaiPhong.Data.Persistence.Migrations
                     b.ToTable("Rooms", "dbo", t =>
                         {
                             t.HasCheckConstraint("CK_Rooms_01", "(status IN ('ACTIVE','INACTIVE'))");
+
+                            t.HasCheckConstraint("CK_Rooms_02", "(room_type IN ('2D','3D','IMAX','IMAX_3D','4DX','SCREENX','DOLBY_ATMOS','VIP'))");
                         });
                 });
 

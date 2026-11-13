@@ -147,3 +147,53 @@ public sealed class PublishShowtimeRequest
 
     public Dictionary<string, long> Prices { get; set; } = new(StringComparer.OrdinalIgnoreCase);
 }
+// Screen-room creation. Validation is repeated in the service so non-HTTP callers are protected.
+public sealed class CreateRoomRequest
+{
+    [Required(ErrorMessage = "Vui lòng nhập mã phòng.")]
+    [StringLength(24, MinimumLength = 2, ErrorMessage = "Mã phòng phải có 2 đến 24 ký tự.")]
+    [RegularExpression(@"^[A-Za-z0-9_]+$", ErrorMessage = "Mã phòng chỉ gồm chữ không dấu, số hoặc dấu gạch dưới.")]
+    public string RoomCode { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "Vui lòng nhập tên phòng.")]
+    [StringLength(100, ErrorMessage = "Tên phòng tối đa 100 ký tự.")]
+    public string RoomName { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "Vui lòng chọn loại phòng chiếu.")]
+    [RegularExpression(@"^(2D|3D|IMAX|IMAX_3D|4DX|SCREENX|DOLBY_ATMOS|VIP)$", ErrorMessage = "Loại phòng không hợp lệ.")]
+    public string RoomType { get; set; } = "2D";
+
+    [Range(1, 20, ErrorMessage = "Số hàng ghế phải từ 1 đến 20.")]
+    public int Rows { get; set; } = 6;
+
+    [Range(1, 25, ErrorMessage = "Số ghế mỗi hàng phải từ 1 đến 25.")]
+    public short Columns { get; set; } = 10;
+
+    // 1-based index. Rows + 1 means a room with STANDARD seats only.
+    [Range(1, 21, ErrorMessage = "Hàng VIP bắt đầu phải nằm trong khoảng 1 đến 21.")]
+    public int VipStartRow { get; set; } = 4;
+}
+public sealed class EditRoomRequest
+{
+    [Required(ErrorMessage = "Vui lòng nhập tên phòng.")]
+    [StringLength(100, ErrorMessage = "Tên phòng tối đa 100 ký tự.")]
+    public string RoomName { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "Vui lòng chọn loại phòng chiếu.")]
+    [RegularExpression(@"^(2D|3D|IMAX|IMAX_3D|4DX|SCREENX|DOLBY_ATMOS|VIP)$", ErrorMessage = "Loại phòng không hợp lệ.")]
+    public string RoomType { get; set; } = "2D";
+
+    [Required(ErrorMessage = "Vui lòng chọn trạng thái.")]
+    [RegularExpression(@"^(ACTIVE|INACTIVE)$", ErrorMessage = "Trạng thái phải là ACTIVE hoặc INACTIVE.")]
+    public string Status { get; set; } = "ACTIVE";
+
+    // Sent by the form only when this room has no showtime history and has a regular grid.
+    [Range(1, 20, ErrorMessage = "Số hàng phải từ 1 đến 20.")]
+    public int? Rows { get; set; }
+
+    [Range(1, 25, ErrorMessage = "Số ghế mỗi hàng phải từ 1 đến 25.")]
+    public short? Columns { get; set; }
+
+    [Range(1, 21, ErrorMessage = "Hàng VIP bắt đầu phải từ 1 đến 21.")]
+    public int? VipStartRow { get; set; }
+}

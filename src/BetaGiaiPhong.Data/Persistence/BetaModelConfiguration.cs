@@ -104,12 +104,14 @@ public static class BetaModelConfiguration
             b.ToTable("Rooms", t =>
             {
                 t.HasCheckConstraint("CK_Rooms_01", @"(status IN ('ACTIVE','INACTIVE'))");
+                t.HasCheckConstraint("CK_Rooms_02", @"(room_type IN ('2D','3D','IMAX','IMAX_3D','4DX','SCREENX','DOLBY_ATMOS','VIP'))");
             });
             b.HasKey(e => e.RoomId).HasName("PK_Rooms");
             b.HasAlternateKey(e => e.RoomCode).HasName("UQ_Rooms_01");
             b.Property(e => e.RoomId).HasColumnName("room_id").HasColumnType("bigint").ValueGeneratedOnAdd().UseIdentityColumn();
             b.Property(e => e.RoomCode).HasColumnName("room_code").HasColumnType("varchar(24)").IsRequired();
             b.Property(e => e.RoomName).HasColumnName("room_name").HasColumnType("nvarchar(100)").IsRequired();
+            b.Property(e => e.RoomType).HasColumnName("room_type").HasColumnType("varchar(24)").IsRequired().HasDefaultValue("2D");
             b.Property(e => e.Status).HasColumnName("status").HasColumnType("varchar(12)").IsRequired().HasDefaultValueSql(@"('ACTIVE')");
         });
 

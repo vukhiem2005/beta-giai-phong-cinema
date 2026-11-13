@@ -10,14 +10,28 @@
 <div class="bgp-ops-page">
     <header class="bgp-ops-header">
         <div class="bgp-ops-header__main">
-            <div class="bgp-ops-eyebrow">AUDITORIUM INVENTORY • READ-ONLY REFERENCE</div>
+            <div class="bgp-ops-eyebrow">AUDITORIUM INVENTORY • ROOM MANAGEMENT</div>
             <h1 class="bgp-ops-title">Phòng chiếu &amp; Sơ đồ ghế vật lý</h1>
             <p class="bgp-ops-subtitle">
                 Tham chiếu danh mục phòng chiếu, sức chứa ghế hoạt động và cấu trúc phân hạng ghế vật lý của rạp Beta Giải Phóng.
             </p>
         </div>
-    </header>
+        <div class="bgp-ops-actions">
+            <a asp-action="RoomCreate" class="bgp-btn bgp-btn--primary">+ Thêm phòng chiếu</a>
+        </div>    </header>
 
+    @if (TempData["Error"] is string errorMessage)
+    {
+        <div class="bgp-ops-alert bgp-ops-alert--danger" role="alert" style="margin-bottom:16px;">
+            @errorMessage
+        </div>
+    }
+    @if (TempData["Success"] is string successMessage)
+    {
+        <div class="bgp-ops-alert" role="status" style="margin-bottom: 16px;">
+            @successMessage
+        </div>
+    }
     <div class="bgp-ops-rooms-grid">
         @foreach (var room in Model.Rooms)
         {
@@ -27,6 +41,7 @@
                         <div>
                             <h2 class="bgp-ops-card__title" style="font-size: 1.05rem;">@room.RoomName</h2>
                             <div class="bgp-ops-movie-sub bgp-ops-mono">Mã phòng: @room.RoomCode</div>
+                            <div class="bgp-ops-movie-sub">Loại phòng: <strong>@room.RoomType</strong></div>
                         </div>
                         <span class="badge bgp-ops-badge @(room.Status == "ACTIVE" ? "bgp-ops-badge--emerald" : "bgp-ops-badge--slate")">
                             @room.Status
@@ -55,7 +70,13 @@
                         </div>
                     </div>
                 </div>
-                <div class="bgp-ops-card__footer" style="justify-content: flex-end;">
+                <div class="bgp-ops-card__footer" style="justify-content:flex-end; gap:8px; flex-wrap:wrap;">
+                    <a asp-action="RoomEdit" asp-route-id="@room.RoomId" class="bgp-btn bgp-btn--outline bgp-btn--sm">Sửa</a>
+                    @if (!room.HasShowtimes)
+                    {
+                        <a asp-action="RoomDeleteConfirm" asp-route-id="@room.RoomId"
+                           class="bgp-btn bgp-btn--outline bgp-btn--sm" style="border-color:#be123c; color:#fda4af;">Xóa</a>
+                    }
                     <a asp-action="RoomDetail" asp-route-id="@room.RoomId" class="bgp-btn bgp-btn--outline bgp-btn--sm">
                         Xem sơ đồ ghế vật lý &rarr;
                     </a>

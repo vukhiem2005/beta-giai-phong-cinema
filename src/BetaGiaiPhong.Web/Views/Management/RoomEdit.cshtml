@@ -1,0 +1,98 @@
+@model BetaGiaiPhong.Web.Models.ViewModels.ManageRoomEditViewModel
+@{
+    ViewData["Title"] = "Sửa phòng chiếu";
+}
+@section Styles {
+    <link rel="stylesheet" href="~/css/cinema/page-ops.css" asp-append-version="true" />
+}
+<div class="bgp-ops-page bgp-ops-page--narrow">
+    <ol class="bgp-ops-breadcrumb" aria-label="Breadcrumb">
+        <li><a asp-action="Rooms">Phòng chiếu</a></li>
+        <li class="bgp-ops-breadcrumb__sep" aria-hidden="true">/</li>
+        <li aria-current="page">Sửa @Model.RoomCode</li>
+    </ol>
+    <section class="bgp-ops-card">
+        <div class="bgp-ops-card__header">
+            <div>
+                <h1 class="bgp-ops-title" style="font-size:1.35rem;">Sửa phòng chiếu</h1>
+                <div class="bgp-ops-movie-sub">Mã phòng: <strong>@Model.RoomCode</strong> · @Model.TotalSeats ghế</div>
+            </div>
+        </div>
+        <div class="bgp-ops-card__body">
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="bgp-ops-alert bgp-ops-alert--danger" role="alert" style="margin-bottom:16px;">
+                    <div asp-validation-summary="All"></div>
+                </div>
+            }
+            <form asp-action="RoomEdit" asp-route-id="@Model.RoomId" method="post">
+                @Html.AntiForgeryToken()
+                <div class="bgp-ops-form-group">
+                    <label for="RoomName" class="bgp-ops-label">Tên phòng *</label>
+                    <input id="RoomName" name="RoomName" value="@Model.Form.RoomName"
+                           class="bgp-ops-input" maxlength="100" required />
+                </div>
+                <div class="bgp-ops-form-row-2 bgp-ops-form-group">
+                    <div>
+                        <label for="RoomType" class="bgp-ops-label">Loại phòng / Công nghệ chiếu *</label>
+                        <select id="RoomType" name="RoomType" class="bgp-ops-select" required>
+                            <option value="2D" selected="@(Model.Form.RoomType == "2D")">2D tiêu chuẩn</option>
+                            <option value="3D" selected="@(Model.Form.RoomType == "3D")">3D</option>
+                            <option value="IMAX" selected="@(Model.Form.RoomType == "IMAX")">IMAX</option>
+                            <option value="IMAX_3D" selected="@(Model.Form.RoomType == "IMAX_3D")">IMAX 3D</option>
+                            <option value="4DX" selected="@(Model.Form.RoomType == "4DX")">4DX</option>
+                            <option value="SCREENX" selected="@(Model.Form.RoomType == "SCREENX")">ScreenX</option>
+                            <option value="DOLBY_ATMOS" selected="@(Model.Form.RoomType == "DOLBY_ATMOS")">Dolby Atmos</option>
+                            <option value="VIP" selected="@(Model.Form.RoomType == "VIP")">Phòng VIP</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="Status" class="bgp-ops-label">Trạng thái hoạt động</label>
+                        <select id="Status" name="Status" class="bgp-ops-select" required>
+                            <option value="ACTIVE" selected="@(Model.Form.Status == "ACTIVE")">Đang hoạt động (ACTIVE)</option>
+                            <option value="INACTIVE" selected="@(Model.Form.Status == "INACTIVE")">Ngừng hoạt động (INACTIVE)</option>
+                        </select>
+                    </div>
+                </div>
+                @if (Model.CanEditLayout)
+                {
+                    <div class="bgp-override-box">
+                        <h2 class="bgp-ops-card__title">Chỉnh sửa sơ đồ ghế</h2>
+                        <p class="bgp-ops-hint">Phòng chưa có suất chiếu. Có thể chỉnh số hàng và số ghế; thao tác sẽ tạo lại ghế vật lý nếu sơ đồ thay đổi.</p>
+                        <div class="bgp-ops-form-row-3 bgp-ops-form-group">
+                            <div>
+                                <label for="Rows" class="bgp-ops-label">Số hàng</label>
+                                <input id="Rows" name="Rows" type="number" value="@Model.Form.Rows" min="1" max="20" required class="bgp-ops-input bgp-ops-mono" />
+                            </div>
+                            <div>
+                                <label for="Columns" class="bgp-ops-label">Ghế mỗi hàng</label>
+                                <input id="Columns" name="Columns" type="number" value="@Model.Form.Columns" min="1" max="25" required class="bgp-ops-input bgp-ops-mono" />
+                            </div>
+                            <div>
+                                <label for="VipStartRow" class="bgp-ops-label">VIP bắt đầu từ hàng</label>
+                                <input id="VipStartRow" name="VipStartRow" type="number" value="@Model.Form.VipStartRow" min="1" max="21" required class="bgp-ops-input bgp-ops-mono" />
+                            </div>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="bgp-ops-alert" role="note" style="margin-bottom:16px;">
+                        @if (Model.HasShowtimes)
+                        {
+                            <span>Phòng đã có lịch sử suất chiếu nên sơ đồ ghế được khóa. Vẫn có thể đổi tên, loại phòng và trạng thái phù hợp.</span>
+                        }
+                        else
+                        {
+                            <span>Phòng có sơ đồ ghế đặc biệt hoặc ghế ngừng hoạt động. Chức năng sửa tự động chỉ hỗ trợ lưới ghế chữ nhật thuần STANDARD/VIP.</span>
+                        }
+                    </div>
+                }
+                <div style="display:flex; justify-content:space-between; gap:12px; margin-top:20px; border-top:1px solid var(--bgp-border-subtle); padding-top:16px;">
+                    <a asp-action="RoomDetail" asp-route-id="@Model.RoomId" class="bgp-btn bgp-btn--outline">Hủy bỏ</a>
+                    <button type="submit" class="bgp-btn bgp-btn--primary">Lưu thay đổi</button>
+                </div>
+            </form>
+        </div>
+    </section>
+</div>

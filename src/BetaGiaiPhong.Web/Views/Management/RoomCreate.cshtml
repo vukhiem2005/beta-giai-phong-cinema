@@ -1,0 +1,94 @@
+@model BetaGiaiPhong.Web.Models.Requests.CreateRoomRequest
+@{
+    ViewData["Title"] = "Thêm phòng chiếu";
+}
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/cinema/page-ops.css" asp-append-version="true" />
+}
+
+<div class="bgp-ops-page bgp-ops-page--narrow">
+    <ol class="bgp-ops-breadcrumb" aria-label="Breadcrumb">
+        <li><a asp-action="Rooms">Phòng chiếu</a></li>
+        <li class="bgp-ops-breadcrumb__sep" aria-hidden="true">/</li>
+        <li aria-current="page">Thêm phòng chiếu</li>
+    </ol>
+
+    <section class="bgp-ops-card">
+        <div class="bgp-ops-card__header">
+            <div>
+                <h1 class="bgp-ops-title" style="font-size: 1.35rem;">Thêm phòng chiếu</h1>
+                <div class="bgp-ops-movie-sub">Tạo phòng và sơ đồ ghế vật lý. Không tác động đến phòng đã có.</div>
+            </div>
+            <span class="badge bgp-ops-badge bgp-ops-badge--emerald">ACTIVE</span>
+        </div>
+        <div class="bgp-ops-card__body">
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="bgp-ops-alert bgp-ops-alert--danger" role="alert" style="margin-bottom: 16px;">
+                    <div asp-validation-summary="All"></div>
+                </div>
+            }
+
+            <form asp-action="RoomCreate" method="post">
+                @Html.AntiForgeryToken()
+
+                <div class="bgp-ops-form-row-2 bgp-ops-form-group">
+                    <div>
+                        <label asp-for="RoomCode" class="bgp-ops-label">Mã phòng *</label>
+                        <input asp-for="RoomCode" class="bgp-ops-input bgp-ops-mono"
+                               placeholder="PHONG_02" maxlength="24" required />
+                        <div class="bgp-ops-hint">Duy nhất, gồm chữ không dấu, số và dấu gạch dưới.</div>
+                    </div>
+                    <div>
+                        <label asp-for="RoomName" class="bgp-ops-label">Tên phòng *</label>
+                        <input asp-for="RoomName" class="bgp-ops-input" maxlength="100"
+                               placeholder="Phòng 02 — Beta Giải Phóng" required />
+                    </div>
+                </div>
+
+                <div class="bgp-ops-form-group">
+                    <label asp-for="RoomType" class="bgp-ops-label">Loại phòng / Công nghệ chiếu *</label>
+                    <select asp-for="RoomType" class="bgp-ops-select" required>
+                        <option value="2D">2D tiêu chuẩn</option>
+                        <option value="3D">3D</option>
+                        <option value="IMAX">IMAX</option>
+                        <option value="IMAX_3D">IMAX 3D</option>
+                        <option value="4DX">4DX</option>
+                        <option value="SCREENX">ScreenX</option>
+                        <option value="DOLBY_ATMOS">Dolby Atmos</option>
+                        <option value="VIP">Phòng VIP</option>
+                    </select>
+                </div>
+                <div class="bgp-ops-form-row-3 bgp-ops-form-group">
+                    <div>
+                        <label asp-for="Rows" class="bgp-ops-label">Số hàng ghế *</label>
+                        <input asp-for="Rows" type="number" class="bgp-ops-input bgp-ops-mono"
+                               min="1" max="20" required />
+                    </div>
+                    <div>
+                        <label asp-for="Columns" class="bgp-ops-label">Số ghế mỗi hàng *</label>
+                        <input asp-for="Columns" type="number" class="bgp-ops-input bgp-ops-mono"
+                               min="1" max="25" required />
+                    </div>
+                    <div>
+                        <label asp-for="VipStartRow" class="bgp-ops-label">VIP bắt đầu từ hàng số *</label>
+                        <input asp-for="VipStartRow" type="number" class="bgp-ops-input bgp-ops-mono"
+                               min="1" max="21" required />
+                    </div>
+                </div>
+
+                <p class="bgp-ops-hint">
+                    Hàng được đánh A, B, C... từ màn hình chiếu về phía sau. Ví dụ 6 hàng,
+                    10 ghế/hàng và VIP bắt đầu ở hàng 4 tạo ra 60 ghế:
+                    A–C là STANDARD; D–F là VIP. Để tất cả ghế STANDARD, đặt hàng VIP bắt đầu bằng số hàng + 1.
+                    Phòng mới mặc định ACTIVE.
+                </p>
+                <div style="display:flex; justify-content:space-between; gap:12px; margin-top:20px; padding-top:16px; border-top:1px solid var(--bgp-border-subtle);">
+                    <a asp-action="Rooms" class="bgp-btn bgp-btn--outline">Hủy bỏ</a>
+                    <button type="submit" class="bgp-btn bgp-btn--primary">Lưu phòng chiếu</button>
+                </div>
+            </form>
+        </div>
+    </section>
+</div>

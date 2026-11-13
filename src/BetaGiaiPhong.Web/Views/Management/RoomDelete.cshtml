@@ -1,0 +1,33 @@
+@model BetaGiaiPhong.Web.Models.ViewModels.ManageRoomDetailViewModel
+@{
+    var room = Model.Room;
+    ViewData["Title"] = "Xác nhận xóa phòng";
+}
+@section Styles {
+    <link rel="stylesheet" href="~/css/cinema/page-ops.css" asp-append-version="true" />
+}
+<div class="bgp-ops-page bgp-ops-page--narrow">
+    <ol class="bgp-ops-breadcrumb" aria-label="Breadcrumb">
+        <li><a asp-action="Rooms">Phòng chiếu</a></li>
+        <li class="bgp-ops-breadcrumb__sep" aria-hidden="true">/</li>
+        <li aria-current="page">Xóa phòng</li>
+    </ol>
+    <section class="bgp-ops-card">
+        <div class="bgp-ops-card__header">
+            <h1 class="bgp-ops-title" style="font-size:1.35rem;">Xác nhận xóa phòng</h1>
+        </div>
+        <div class="bgp-ops-card__body">
+            <div class="bgp-ops-alert bgp-ops-alert--danger" role="alert" style="margin-bottom:16px;">
+                Bạn sắp xóa vĩnh viễn phòng <strong>@room.RoomName</strong> (@room.RoomCode) và toàn bộ <strong>@room.TotalSeats</strong> ghế vật lý.
+                Chỉ cho phép khi chưa từng có suất chiếu; hệ thống sẽ kiểm tra lại khi lưu.
+            </div>
+            <p>Loại phòng: <strong>@room.RoomType</strong> · Trạng thái: <strong>@room.Status</strong></p>
+            <form asp-action="RoomDelete" asp-route-id="@room.RoomId" method="post"
+                  style="display:flex; gap:12px; justify-content:flex-end; margin-top:20px;">
+                @Html.AntiForgeryToken()
+                <a asp-action="Rooms" class="bgp-btn bgp-btn--outline">Hủy bỏ</a>
+                <button type="submit" class="bgp-btn bgp-btn--primary" style="background:#b91c1c; border-color:#b91c1c;">Xác nhận xóa phòng</button>
+            </form>
+        </div>
+    </section>
+</div>

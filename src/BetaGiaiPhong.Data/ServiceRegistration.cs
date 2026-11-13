@@ -37,6 +37,7 @@ public static class ServiceRegistration
         services.AddScoped<TicketScanningService>();
         services.AddScoped<MovieManagementService>();
         services.AddScoped<ManagementQueryService>();
+        services.AddScoped<RoomManagementService>();
         services.AddScoped<MovieContentSyncService>();
         return services;
     }
