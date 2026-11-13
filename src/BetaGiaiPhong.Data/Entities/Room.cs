@@ -5,6 +5,7 @@ public sealed class Room
     public long RoomId { get; set; }
     public string RoomCode { get; set; } = string.Empty;
     public string RoomName { get; set; } = string.Empty;
+    public string RoomType { get; set; } = "2D";
     public string Status { get; set; } = string.Empty;
 
     public ICollection<Seat> Seats { get; set; } = new List<Seat>();

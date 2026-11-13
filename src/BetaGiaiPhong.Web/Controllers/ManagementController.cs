@@ -18,6 +18,7 @@ public sealed class ManagementController(
     MovieContentSyncService syncService,
     ShowtimePublishingService publishingService,
     ManagementQueryService queryService,
+    RoomManagementService roomManagementService,
     ISystemClock clock,
     ILogger<ManagementController> logger) : Controller
 {
@@ -681,6 +682,154 @@ public sealed class ManagementController(
         return View(new ManageRoomsViewModel { Rooms = rooms });
     }
 
+    [HttpGet("rooms/create")]
+    public IActionResult RoomCreate() => View(new CreateRoomRequest());
+
+    [HttpPost("rooms/create")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> RoomCreate(
+        [FromForm] CreateRoomRequest request, CancellationToken ct)
+    {
+        if (!ModelState.IsValid) return View(request);
+
+        try
+        {
+            var managerId = GetCurrentManagerId();
+            var roomId = await roomManagementService.CreateAsync(
+                managerId,
+                request.RoomCode,
+                request.RoomName,
+                request.RoomType,
+                request.Rows,
+                request.Columns,
+                request.VipStartRow,
+                ct);
+
+            logger.LogInformation("Manager {ManagerId} created room {RoomId} ({RoomCode})",
+                managerId, roomId, request.RoomCode);
+            TempData["Success"] = $"Đã tạo phòng '{request.RoomName.Trim()}' cùng sơ đồ ghế thành công.";
+            return RedirectToAction(nameof(Rooms));
+        }
+        catch (BusinessRuleException ex)
+        {
+            ModelState.AddModelError(string.Empty, ex.Message);
+            return View(request);
+        }
+    }
+    private async Task<ManageRoomEditViewModel?> LoadRoomEditViewModelAsync(
+        long id, EditRoomRequest? posted, CancellationToken ct)
+    {
+        var room = await db.Rooms.AsNoTracking().Include(r => r.Seats)
+            .SingleOrDefaultAsync(r => r.RoomId == id, ct);
+        if (room is null) return null;
+
+        var hasShowtimes = await db.Showtimes.AsNoTracking()
+            .AnyAsync(s => s.RoomId == id, ct);
+        var groups = room.Seats.GroupBy(s => s.RowLabel).OrderBy(g => g.Key).ToList();
+        int rowCount = groups.Count;
+        int columns = rowCount == 0 ? 0 : groups[0].Count();
+        int firstVip = groups.FindIndex(g => g.Any(s => s.SeatTypeCode == "VIP"));
+        int vipStartRow = firstVip < 0 ? rowCount + 1 : firstVip + 1;
+
+        bool regular = rowCount is >= 1 and <= 20 && columns is >= 1 and <= 25 &&
+                       room.Seats.Count == rowCount * columns;
+        for (int i = 0; i < groups.Count && regular; i++)
+        {
+            var label = ((char)('A' + i)).ToString();
+            var expectedType = i + 1 >= vipStartRow ? "VIP" : "STANDARD";
+            var group = groups[i];
+            if (group.Key != label || group.Count() != columns ||
+                group.Select(s => s.ColumnNo).Distinct().Count() != columns ||
+                group.Any(s => !s.IsActive || s.RowLabel != label ||
+                    s.ColumnNo < 1 || s.ColumnNo > columns ||
+                    s.SeatCode != label + s.ColumnNo || s.SeatTypeCode != expectedType))
+                regular = false;
+        }
+        bool canEditLayout = !hasShowtimes && regular;
+
+        return new ManageRoomEditViewModel
+        {
+            RoomId = room.RoomId,
+            RoomCode = room.RoomCode,
+            TotalSeats = room.Seats.Count,
+            HasShowtimes = hasShowtimes,
+            CanEditLayout = canEditLayout,
+            Form = posted ?? new EditRoomRequest
+            {
+                RoomName = room.RoomName,
+                RoomType = room.RoomType,
+                Status = room.Status,
+                Rows = canEditLayout ? rowCount : null,
+                Columns = canEditLayout ? (short)columns : null,
+                VipStartRow = canEditLayout ? vipStartRow : null
+            }
+        };
+    }
+
+    [HttpGet("rooms/{id:long}/edit")]
+    public async Task<IActionResult> RoomEdit(long id, CancellationToken ct)
+    {
+        var vm = await LoadRoomEditViewModelAsync(id, null, ct);
+        return vm is null ? NotFound() : View(vm);
+    }
+
+    [HttpPost("rooms/{id:long}/edit")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> RoomEdit(
+        long id, [FromForm] EditRoomRequest request, CancellationToken ct)
+    {
+        if (!ModelState.IsValid)
+        {
+            var form = await LoadRoomEditViewModelAsync(id, request, ct);
+            return form is null ? NotFound() : View(form);
+        }
+        try
+        {
+            var managerId = GetCurrentManagerId();
+            await roomManagementService.UpdateAsync(
+                managerId, id, request.RoomName, request.RoomType,
+                request.Status, request.Rows, request.Columns, request.VipStartRow, ct);
+            logger.LogInformation("Manager {ManagerId} updated room {RoomId}", managerId, id);
+            TempData["Success"] = "Đã cập nhật phòng chiếu thành công.";
+            return RedirectToAction(nameof(RoomDetail), new { id });
+        }
+        catch (BusinessRuleException ex)
+        {
+            ModelState.AddModelError(string.Empty, ex.Message);
+            var form = await LoadRoomEditViewModelAsync(id, request, ct);
+            return form is null ? NotFound() : View(form);
+        }
+    }
+
+    [HttpGet("rooms/{id:long}/delete")]
+    public async Task<IActionResult> RoomDeleteConfirm(long id, CancellationToken ct)
+    {
+        if (await db.Showtimes.AsNoTracking().AnyAsync(s => s.RoomId == id, ct))
+        {
+            TempData["Error"] = "Phòng đã có lịch sử suất chiếu. Chỉ có thể ngừng hoạt động, không thể xóa.";
+            return RedirectToAction(nameof(Rooms));
+        }
+        var room = await queryService.GetRoomDetailsWithSeatLayoutAsync(id, ct);
+        return room is null ? NotFound() : View("RoomDelete", new ManageRoomDetailViewModel { Room = room });
+    }
+
+    [HttpPost("rooms/{id:long}/delete")]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> RoomDelete(long id, CancellationToken ct)
+    {
+        try
+        {
+            var managerId = GetCurrentManagerId();
+            await roomManagementService.DeleteAsync(managerId, id, ct);
+            logger.LogInformation("Manager {ManagerId} deleted room {RoomId}", managerId, id);
+            TempData["Success"] = "Đã xóa phòng và sơ đồ ghế chưa sử dụng.";
+        }
+        catch (BusinessRuleException ex)
+        {
+            TempData["Error"] = ex.Message;
+        }
+        return RedirectToAction(nameof(Rooms));
+    }
     [HttpGet("rooms/{id:long}")]
     public async Task<IActionResult> RoomDetail(long id, CancellationToken ct)
     {

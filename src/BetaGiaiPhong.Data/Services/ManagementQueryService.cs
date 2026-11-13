@@ -88,7 +88,9 @@ public sealed record RoomManagementSummaryDto(
     string Status,
     int TotalSeats,
     int ActiveSeats,
-    IReadOnlyList<string> SeatTypes);
+    IReadOnlyList<string> SeatTypes,
+    string RoomType = "2D",
+    bool HasShowtimes = false);
 
 public sealed record PhysicalSeatDto(
     long SeatId,
@@ -105,7 +107,8 @@ public sealed record RoomManagementDetailDto(
     string Status,
     int TotalSeats,
     int ActiveSeats,
-    IReadOnlyList<PhysicalSeatDto> Seats);
+    IReadOnlyList<PhysicalSeatDto> Seats,
+    string RoomType = "2D");
 
 public sealed record MovieRevenueItemDto(long MovieId, string Title, long TicketsSold, decimal RevenueVnd);
 public sealed record RoomRevenueItemDto(long RoomId, string RoomName, long TicketsSold, decimal RevenueVnd);
@@ -440,6 +443,8 @@ public sealed class ManagementQueryService(BetaDbContext db, ISystemClock clock)
             .AsNoTracking()
             .OrderBy(r => r.RoomId)
             .ToListAsync(ct);
+        var usedIds = (await db.Showtimes.AsNoTracking()
+            .Select(s => s.RoomId).Distinct().ToListAsync(ct)).ToHashSet();
 
         return rooms.Select(r => new RoomManagementSummaryDto(
             r.RoomId,
@@ -448,7 +453,9 @@ public sealed class ManagementQueryService(BetaDbContext db, ISystemClock clock)
             r.Status,
             r.Seats.Count,
             r.Seats.Count(s => s.IsActive),
-            r.Seats.Where(s => s.IsActive).Select(s => s.SeatTypeCode).Distinct().ToList()
+            r.Seats.Where(s => s.IsActive).Select(s => s.SeatTypeCode).Distinct().ToList(),
+            r.RoomType,
+            usedIds.Contains(r.RoomId)
         )).ToList();
     }
 
@@ -472,7 +479,8 @@ public sealed class ManagementQueryService(BetaDbContext db, ISystemClock clock)
             room.Status,
             seats.Count,
             seats.Count(s => s.IsActive),
-            seats
+            seats,
+            room.RoomType
         );
     }
 

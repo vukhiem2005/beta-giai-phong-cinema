@@ -22,12 +22,14 @@
                 <span class="badge bgp-ops-badge @(r.Status == "ACTIVE" ? "bgp-ops-badge--emerald" : "bgp-ops-badge--slate")">@r.Status</span>
             </div>
             <h1 class="bgp-ops-title">@r.RoomName</h1>
+            <div class="bgp-ops-movie-sub">Công nghệ chiếu: <strong>@r.RoomType</strong></div>
             <p class="bgp-ops-subtitle">
                 Cấu hình danh mục ghế vật lý (Read-only Reference). Không cho phép sửa đổi cấu trúc phòng đã vận hành để bảo toàn toàn vẹn lịch sử vé.
             </p>
         </div>
 
         <div class="bgp-ops-actions">
+            <a asp-action="RoomEdit" asp-route-id="@r.RoomId" class="bgp-btn bgp-btn--outline">Sửa phòng</a>
             <div style="padding: 8px 14px; border-radius: 8px; background: var(--bgp-bg-surface-1); border: 1px solid var(--bgp-border-default); text-align: right;">
                 <div class="bgp-ops-hint" style="margin:0;">Tổng số ghế</div>
                 <div class="bgp-ops-mono" style="font-size: 1.2rem; font-weight: 800; color: #FFFFFF;">@r.TotalSeats</div>
@@ -39,6 +41,10 @@
         </div>
     </header>
 
+    @if (TempData["Success"] is string successMessage)
+    {
+        <div class="bgp-ops-alert" role="status" style="margin-bottom:16px;">@successMessage</div>
+    }
     <section class="bgp-ops-card">
         <div class="bgp-ops-card__header">
             <h2 class="bgp-ops-card__title">Sơ đồ bố trí ghế vật lý</h2>

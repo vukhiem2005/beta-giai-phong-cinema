@@ -1,5 +1,6 @@
 using BetaGiaiPhong.Data.Entities;
 using BetaGiaiPhong.Data.Services;
+using BetaGiaiPhong.Web.Models.Requests;
 
 namespace BetaGiaiPhong.Web.Models.ViewModels;
 
@@ -112,6 +113,15 @@ public sealed class ManageRoomsViewModel
 public sealed class ManageRoomDetailViewModel
 {
     public RoomManagementDetailDto Room { get; set; } = null!;
+}
+public sealed class ManageRoomEditViewModel
+{
+    public long RoomId { get; set; }
+    public string RoomCode { get; set; } = string.Empty;
+    public int TotalSeats { get; set; }
+    public bool HasShowtimes { get; set; }
+    public bool CanEditLayout { get; set; }
+    public EditRoomRequest Form { get; set; } = new();
 }
 
 public sealed class ManageDashboardViewModel
