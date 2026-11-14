@@ -264,5 +264,5 @@ For test environments and database-isolation safeguards, refer to the [installat
 
 ---
 
-**Repository:** [github.com/vankhiem1609/beta-giai-phong-cinema](https://github.com/vankhiem1609/beta-giai-phong-cinema)
+**Repository:** [github.com/vankhiem1609/beta-giai-phong-cinema](https://github.com/vukhiem2005/beta-giai-phong-cinema)
 **Focus:** ASP.NET Core / SQL Server / concurrency control / secure QR workflows / evidence-based software testing.
