@@ -78,6 +78,7 @@ jobs:
 
       - name: Run Tests
         env:
+          DOTNET_USE_POLLING_FILE_WATCHER: "1"
           BGP_TEST_SQL_MASTER_CONNECTION: "Server=localhost,1433;Database=master;User Id=sa;Password=BgpTestPassword123!;TrustServerCertificate=True;"
           BGP_TEST_ALLOW_DB_CREATE: "true"
           BGP_TEST_AUTO_CLEANUP_DB: "true"
