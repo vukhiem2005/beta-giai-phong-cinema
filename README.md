@@ -173,7 +173,7 @@ Open **http://localhost:5145** (login: `http://localhost:5145/account/login`).
 Clone and restore:
 
 ```powershell
-git clone https://github.com/vankhiem1609/beta-giai-phong-cinema.git
+git clone https://github.com/vukhiem2005/beta-giai-phong-cinema.git
 cd beta-giai-phong-cinema
 dotnet tool restore --tool-manifest .\dotnet-tools.json
 dotnet restore .\BetaGiaiPhong.slnx
@@ -233,7 +233,7 @@ The repository provides automated unit, SQL Server integration, ASP.NET Core web
 | Playwright Chromium tests | **50 / 50 passed**, across 15 spec files | [UI-P8 acceptance report](docs/ui/UI_P8_FINAL_ACCEPTANCE_REPORT.md) |
 | SQL Server integrity verification | **9 / 9 invariant groups passed** | [UI-P8 acceptance report](docs/ui/UI_P8_FINAL_ACCEPTANCE_REPORT.md) |
 
-These results were recorded at a specific local acceptance milestone. They do **not** establish that the latest commit has a passing CI run. See [GitHub Actions](https://github.com/vankhiem1609/beta-giai-phong-cinema/actions) for current workflow status and [test acceptance documentation](docs/delivery/TEST_ACCEPTANCE_SUMMARY.md) for earlier release evidence.
+These results were recorded at a specific local acceptance milestone. They do **not** establish that the latest commit has a passing CI run. See [GitHub Actions](https://github.com/vukhiem2005/beta-giai-phong-cinema/actions) for current workflow status and [test acceptance documentation](docs/delivery/TEST_ACCEPTANCE_SUMMARY.md) for earlier release evidence.
 
 The [physical-camera UAT plan](docs/delivery/MANUAL_CAMERA_UAT.md) documents manual scanner/device scenarios; those scenarios are **not claimed as completed tests**.
 
@@ -264,5 +264,5 @@ For test environments and database-isolation safeguards, refer to the [installat
 
 ---
 
-**Repository:** [github.com/vankhiem1609/beta-giai-phong-cinema](https://github.com/vukhiem2005/beta-giai-phong-cinema)
+**Repository:** [github.com/vukhiem2005/beta-giai-phong-cinema](https://github.com/vukhiem2005/beta-giai-phong-cinema)
 **Focus:** ASP.NET Core / SQL Server / concurrency control / secure QR workflows / evidence-based software testing.
